@@ -1,0 +1,228 @@
+# 初中科学试卷分析系统
+
+一个功能完整的试卷分析解决方案，支持从 PDF 试卷自动生成细目表、小题分模板、以及学生个人分析报告。
+
+## 功能特性
+
+### 核心功能
+
+- **PDF 解析**：自动提取试卷内容，支持本地 Node.js 环境
+- **AI 细目表生成**：通过 OpenAI 兼容 API 自动分析试卷内容，生成标准化的细目表
+- **小题分模板**：根据细目表自动生成可填写的小题分 Excel 模板
+- **批量报告生成**：根据学生成绩批量生成个人分析报告 PDF
+- **多 API 支持**：支持 OpenAI、Claude 等 OpenAI 兼容接口
+
+### 工作流程
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        完整工作流                                 │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  步骤1: 上传PDF ──→ AI分析 ──→ 细目表Excel                       │
+│    │                                                      │      │
+│    └──────────────────────────────────────────────────┘   │      │
+│                                                        ▼      │
+│  步骤2: 选择细目表 ──→ 生成小题分模板                       │
+│    │                                                      │      │
+│    └──────────────────────────────────────────────────┘   │      │
+│                                                        ▼      │
+│  步骤3: 上传已填写成绩 ──→ 批量生成学生报告PDF              │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+## 系统要求
+
+- **操作系统**：Windows 10/11 (x64)、统信UOS 20/23、Linux
+- **内存**：建议 8GB 及以上
+- **磁盘**：至少 500MB 可用空间
+- **网络**：需要互联网连接（用于 AI API 调用）
+
+## 安装与运行
+
+### Windows
+
+#### 方式一：直接运行（开发模式）
+
+```powershell
+cd main
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+python main.py
+```
+
+#### 方式二：打包成 EXE
+
+```powershell
+cd main
+
+# 清理旧构建（可选）
+Remove-Item -Recurse -Force build, dist, .venv -ErrorAction SilentlyContinue
+
+# 打包（目录模式）
+.\build_exe.ps1
+
+# 或打包为单文件 EXE（启动较慢）
+.\build_exe.ps1 -OneFile
+```
+
+打包完成后：
+- 目录模式：`codex\dist\ScoreReportTool\` 文件夹
+- 单文件模式：`codex\dist\ScoreReportTool.exe`
+
+**注意**：运行打包后的程序时，`node` 文件夹必须与 EXE 在同一目录下。
+
+### Linux / 统信UOS
+
+```bash
+cd codex
+
+# 创建虚拟环境
+python3 -m venv .venv
+source .venv/bin/activate
+
+# 安装依赖
+pip install -r requirements.txt
+
+# 运行
+python main.py
+```
+
+**Linux 下 PDF 解析**：需要下载 Linux 版 Node.js：
+
+```bash
+cd ../node
+wget https://nodejs.org/dist/v20.10.0/node-v20.10.0-linux-x64.tar.xz
+tar -xf node-v20.10.0-linux-x64.tar.xz
+cd node-v20.10.0-linux-x64
+./bin/npm install mineru-open-api
+```
+
+## 使用说明
+
+### 首次配置
+
+1. 启动程序后，切换到「接口配置」标签页
+2. 填写 API 地址（例如：`https://api.openai.com/v1/chat/completions`）
+3. 填写 API 密钥
+4. 选择或输入模型名称（如 `gpt-4`、`gpt-3.5-turbo`）
+5. 设置超时时间（默认 120 秒）
+6. 点击「保存配置」
+
+### 完整工作流
+
+#### 步骤 1：生成细目表
+
+1. 在「完整工作流」标签页中
+2. 点击「选择 PDF 文件」，选择要分析的试卷
+3. 点击「开始 AI 分析」，等待分析完成
+4. 分析完成后，点击「保存细目表 Excel」下载细目表
+5. 或者点击「直接使用细目表」跳过下载，直接进入步骤 2
+
+#### 步骤 2：生成小题分模板
+
+1. 点击「选择细目表」加载已有的细目表 Excel
+2. 或使用步骤 1 生成的细目表（点击「直接使用细目表」）
+3. 点击「生成小题分模板」
+4. 选择保存位置，下载生成的模板文件
+
+#### 步骤 3：批量生成学生报告
+
+1. 使用步骤 2 生成的模板填写学生成绩
+2. 点击「选择已填写成绩表」，加载填写好的成绩表
+3. 点击「开始批量分析」
+4. 等待所有报告生成完成
+5. 点击「打开报告文件夹」查看生成的 PDF 报告
+
+### API 配置说明
+
+| 参数 | 说明 | 示例 |
+|------|------|------|
+| API 地址 | OpenAI 兼容接口地址 | `https://api.openai.com/v1/chat/completions` |
+| API 密钥 | 接口访问密钥 | `sk-xxxxxx` |
+| 模型 | 使用的 AI 模型 | `gpt-4`、`gpt-3.5-turbo` |
+| 超时时间 | 请求超时时间（秒） | `120` |
+
+## 项目结构
+
+```
+main/
+├── main.py                    # 程序入口
+├── build_exe.ps1              # Windows 打包脚本
+├── requirements.txt            # Python 依赖
+├── README.md                   # 本文档
+│
+├── app/                       # 应用模块
+│   ├── __init__.py
+│   ├── unified_app.py         # 统一 GUI 应用
+│   ├── desktop.py             # 桌面模式（保留）
+│   ├── ai_client.py           # AI API 客户端
+│   ├── ai_service.py          # AI 服务封装
+│   ├── analysis_service.py     # 分析服务
+│   ├── config_service.py       # 配置管理
+│   ├── excel_service.py        # Excel 处理
+│   ├── exceptions.py           # 异常定义
+│   ├── models.py              # 数据模型
+│   ├── pdf_parser.py          # PDF 解析模块
+│   └── pdf_service.py          # PDF 生成服务
+│
+├── tests/                     # 测试文件
+│   └── test_core_services.py
+│
+└── scripts/                   # 构建脚本
+    └── build_app.sh           # Linux 打包脚本
+
+node/                          # Node.js 运行时（PDF 解析用）
+└── node-v20.10.0-win-x64/    # Windows Node.js
+```
+
+## 常见问题
+
+### Q: 程序启动报错「缺少 PySide6」
+
+```powershell
+pip install -r requirements.txt
+```
+
+### Q: PDF 解析失败
+
+1. 确保 `node` 文件夹与程序在同一目录
+2. 确保 Node.js 可执行文件存在
+3. 检查 `node/node-v20.10.0-win-x64/node.exe` 是否存在
+
+### Q: AI 接口报错
+
+1. 检查 API 地址是否正确
+2. 检查 API 密钥是否有效
+3. 检查网络连接是否正常
+4. 尝试增加超时时间
+
+### Q: 打包后程序无法运行
+
+1. 确保 `node` 文件夹与 EXE 在同一目录
+2. 确保所有依赖库已正确打包
+3. 尝试以管理员权限运行
+
+## 注意事项
+
+1. **数据安全**：所有数据处理在本地完成，不会上传到服务器
+2. **AI 分析**：生成结果建议人工审核确认
+3. **PDF 解析**：依赖本地 Node.js 环境，需要预先安装 mineru-open-api
+4. **报告生成**：支持的题型包括选择题、填空题、实验探究题、计算题
+
+## 技术栈
+
+| 类别 | 技术 |
+|------|------|
+| GUI 框架 | PySide6 |
+| PDF 解析 | mineru-open-api + Node.js |
+| AI 接口 | OpenAI 兼容 API |
+| Excel 处理 | pandas + openpyxl |
+| PDF 生成 | reportlab |
+| 打包工具 | PyInstaller |
+
+## 许可证
+
+本项目仅供学习交流使用。

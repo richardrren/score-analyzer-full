@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv/
+*.egg-info/
+dist/
+build/
+*.spec
+develop-eggs/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 测试和临时文件
+test_outputs/
+.tmp_tests/
+manual_tmp/
+*.log
+*.tmp
+
+# 配置文件（包含 API 密钥等敏感信息）
+.env
+.env.local
+.env.*.local
+config.json
+config.yaml
+config.yml
+*.ini
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# PyInstaller
+*.spec
+build/
+dist/
+
+# 数据文件（测试数据）
+*.xlsx
+*.xls
+*.csv
+*.pdf
