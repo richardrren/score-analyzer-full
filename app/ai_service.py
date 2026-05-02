@@ -21,6 +21,29 @@ class AIConfig:
         return bool(self.api_key.strip() and self.base_url.strip() and self.model.strip())
 
 
+def _is_chat_completions_endpoint(base_url: str) -> bool:
+    base = base_url.strip().rstrip("/")
+    return base.endswith("/chat/completions")
+
+
+def _build_payload(config: AIConfig, prompt: str) -> Dict[str, Any]:
+    model = config.model.strip()
+    if _is_chat_completions_endpoint(config.base_url):
+        return {
+            "model": model,
+            "messages": [{"role": "user", "content": prompt}],
+        }
+    return {
+        "model": model,
+        "input": [
+            {
+                "role": "user",
+                "content": [{"type": "input_text", "text": prompt}],
+            }
+        ],
+    }
+
+
 def _endpoint(base_url: str) -> str:
     base = base_url.strip().rstrip("/")
     if base.endswith("/responses"):
@@ -62,15 +85,7 @@ def generate_ai_summary(config: AIConfig, analysis: StudentAnalysis) -> str:
         "控制在 180 字以内。JSON："
         + json.dumps(_analysis_payload(analysis), ensure_ascii=False)
     )
-    body = {
-        "model": config.model.strip(),
-        "input": [
-            {
-                "role": "user",
-                "content": [{"type": "input_text", "text": prompt}],
-            }
-        ],
-    }
+    body = _build_payload(config, prompt)
     request = urllib.request.Request(
         _endpoint(config.base_url),
         data=json.dumps(body).encode("utf-8"),
