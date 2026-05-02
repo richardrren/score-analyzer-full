@@ -128,8 +128,8 @@ def create_score_template(items: Iterable[QuestionItem], output_path: str | Path
     first_score_col = sheet.cell(1, 3).column_letter
     last_score_col = sheet.cell(1, len(headers)).column_letter
     for row_idx in range(2, rows + 2):
-        sheet.cell(row_idx, 2).value = f"=SUM({first_score_col}{row_idx}:{last_score_col}{row_idx})"
-        sheet.cell(row_idx, 2).number_format = "0.0"
+        sheet.cell(row_idx, 1).value = None
+        sheet.cell(row_idx, 2).value = None
 
     sheet.auto_filter.ref = f"A1:{last_score_col}{rows + 1}"
     workbook.save(output)
