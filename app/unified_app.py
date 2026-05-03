@@ -86,6 +86,8 @@ class PDFAnalysisWorker(QObject):
             ]
 
             import requests
+            import urllib3
+            urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
             payload = {
                 "model": self.model,
@@ -93,7 +95,9 @@ class PDFAnalysisWorker(QObject):
                 "temperature": 0.3
             }
 
-            response = requests.post(
+            session = requests.Session()
+            session.verify = False
+            response = session.post(
                 self.api_url,
                 headers={
                     "Content-Type": "application/json",
@@ -432,6 +436,8 @@ class MainWindow(QMainWindow):
         self.worker.finished.connect(self.worker_thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.worker_thread.finished.connect(self.worker_thread.deleteLater)
+        self.worker.error.connect(self.worker_thread.quit)
+        self.worker.error.connect(self.worker.deleteLater)
         self.worker_thread.start()
 
     def workflow_on_progress(self, current: int, total: int, name: str) -> None:
