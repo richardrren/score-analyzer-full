@@ -69,29 +69,75 @@ Remove-Item -Recurse -Force build, dist, .venv -ErrorAction SilentlyContinue
 
 ### Linux / 统信UOS
 
+统信UOS基于Linux内核，本程序完全兼容。以下是在统信UOS上运行的详细步骤：
+
+#### 1. 安装系统依赖
+
+打开终端，安装Python和pip（如果尚未安装）：
+
 ```bash
-cd codex
+# 统信UOS商店中搜索"Python"安装，或使用命令安装
+sudo apt update
+sudo apt install python3 python3-pip python3-venv
+```
+
+#### 2. 下载并配置项目
+
+```bash
+# 克隆或下载项目
+cd ~/下载  # 或你存放项目的目录
+# 如果从GitHub下载，解压后进入main目录
 
 # 创建虚拟环境
 python3 -m venv .venv
 source .venv/bin/activate
 
-# 安装依赖
+# 安装Python依赖
 pip install -r requirements.txt
-
-# 运行
-python main.py
 ```
 
-**Linux 下 PDF 解析**：需要下载 Linux 版 Node.js：
+#### 3. 配置Node.js（PDF解析必需）
+
+PDF解析功能需要Node.js环境。运行自动配置脚本：
 
 ```bash
-cd ../node
-wget https://nodejs.org/dist/v20.10.0/node-v20.10.0-linux-x64.tar.xz
-tar -xf node-v20.10.0-linux-x64.tar.xz
-cd node-v20.10.0-linux-x64
-./bin/npm install mineru-open-api
+cd node
+
+# 给脚本添加执行权限
+chmod +x setup_node_linux.sh
+
+# 运行脚本（会自动下载Node.js和mineru-open-api）
+./setup_node_linux.sh
 ```
+
+脚本会自动完成：
+- 下载 Node.js v20.10.0 for Linux x64
+- 解压到 `node/node-v20.10.0-linux-x64/`
+- 安装 mineru-open-api
+
+#### 4. 运行程序
+
+```bash
+cd ..
+source .venv/bin/activate
+python3 main.py
+```
+
+#### 5. 注意事项
+
+- **PDF解析**：必须先运行 `node/setup_node_linux.sh` 配置Node.js环境
+- **API配置**：首次使用需要在程序中配置AI接口地址和密钥
+- **输出路径**：生成的Excel和PDF文件默认保存在用户目录
+
+#### 6. 常见问题
+
+**Q: 提示"Node.js not found"**
+- 确保已运行 `node/setup_node_linux.sh`
+- 确保程序目录下有 `node/node-v20.10.0-linux-x64/` 目录
+
+**Q: 图形界面无法启动**
+- 确保已安装PySide6：`pip install PySide6`
+- 检查系统是否支持Qt图形环境
 
 ## 使用说明
 
