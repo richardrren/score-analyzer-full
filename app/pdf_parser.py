@@ -22,8 +22,14 @@ def get_local_node_path():
         base_dir = get_project_root()
     
     system = platform.system()
+    machine = platform.machine().lower()
     if system == "Windows":
         node_dir = os.path.join(base_dir, "node", "node-v20.10.0-win-x64")
+    elif system == "Linux":
+        if machine in ("aarch64", "arm64"):
+            node_dir = os.path.join(base_dir, "node", "node-v20.10.0-linux-arm64")
+        else:
+            node_dir = os.path.join(base_dir, "node", "node-v20.10.0-linux-x64")
     else:
         node_dir = os.path.join(base_dir, "node", "node-v20.10.0-linux-x64")
     
