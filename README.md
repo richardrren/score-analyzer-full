@@ -88,6 +88,8 @@ chmod +x uos_auto_prepare.sh
 - 检测系统架构（x86_64 / aarch64），下载对应版本的 Miniconda
 - 创建 Python 虚拟环境 `pyside6_env`
 - 安装 PySide6 及所有项目依赖
+- 下载并配置 Node.js（根据架构选择 x64 或 arm64 版本）
+- 安装 mineru-open-api（PDF 解析必需）
 - 验证所有组件是否安装成功
 
 > ⚠️ 安装过程需要网络连接，请确保能够访问清华 pip 镜像源。
@@ -158,14 +160,14 @@ python3 main.py
 
 #### 3. 注意事项
 
-- **PDF解析**：必须先运行 `node/setup_node_linux.sh` 配置Node.js环境
+- **PDF解析**：必须先配置Node.js环境（一键脚本已包含，或手动运行 `node/setup_node_linux.sh`）
 - **API配置**：首次使用需要在程序中配置AI接口地址和密钥
 - **输出路径**：生成的Excel和PDF文件默认保存在用户目录
 
 #### 4. 常见问题
 
 **Q: 提示"Node.js not found"**
-- 确保已运行 `node/setup_node_linux.sh`
+- 确保已运行一键配置脚本或 `node/setup_node_linux.sh`
 - 确保程序目录下有 `node/node-v20.10.0-linux-x64/` 或 `node/node-v20.10.0-linux-arm64/` 目录
 
 **Q: 图形界面无法启动**
@@ -173,7 +175,7 @@ python3 main.py
 - 检查系统是否支持Qt图形环境
 
 **Q: 可执行文件格式错误**
-- 这通常是架构不匹配问题，请确保运行 `node/setup_node_linux.sh` 自动检测并安装正确架构的Node.js
+- 这通常是架构不匹配问题，请确保运行配置脚本自动检测并安装正确架构的Node.js
 
 ## 使用说明
 
