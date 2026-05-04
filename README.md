@@ -71,7 +71,40 @@ Remove-Item -Recurse -Force build, dist, .venv -ErrorAction SilentlyContinue
 
 统信UOS基于Linux内核，本程序完全兼容。以下是在统信UOS上运行的详细步骤：
 
-#### 1. 安装系统依赖
+#### 1. 快速配置（推荐：一键安装）
+
+项目提供了自动化配置脚本，可一键安装所有依赖：
+
+```bash
+# 克隆或下载项目后，进入项目目录
+cd ~/score-analyzer-full
+
+# 添加执行权限并运行一键配置
+chmod +x uos_auto_prepare.sh
+./uos_auto_prepare.sh
+```
+
+脚本会自动完成以下操作：
+- 检测系统架构（x86_64 / aarch64），下载对应版本的 Miniconda
+- 创建 Python 虚拟环境 `pyside6_env`
+- 安装 PySide6 及所有项目依赖
+- 验证所有组件是否安装成功
+
+> ⚠️ 安装过程需要网络连接，请确保能够访问清华 pip 镜像源。
+
+配置完成后，每次使用前运行：
+```bash
+conda activate pyside6_env
+python3 main.py
+```
+
+---
+
+#### 2. 手动配置（传统方式）
+
+如果上述一键脚本无法在你的系统上运行，可以手动按以下步骤配置：
+
+##### 2.1 安装系统依赖
 
 打开终端，安装Python和pip（如果尚未安装）：
 
@@ -81,7 +114,7 @@ sudo apt update
 sudo apt install python3 python3-pip python3-venv
 ```
 
-#### 2. 下载并配置项目
+##### 2.2 下载并配置项目
 
 ```bash
 # 克隆或下载项目
@@ -96,7 +129,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-#### 3. 配置Node.js（PDF解析必需）
+##### 2.3 配置Node.js（PDF解析必需）
 
 PDF解析功能需要Node.js环境。运行自动配置脚本：
 
@@ -111,11 +144,11 @@ chmod +x setup_node_linux.sh
 ```
 
 脚本会自动完成：
-- 下载 Node.js v20.10.0 for Linux x64
-- 解压到 `node/node-v20.10.0-linux-x64/`
+- 检测系统架构（x86_64 / aarch64），下载对应版本的 Node.js
+- 解压到 `node/node-v20.10.0-linux-x64/` 或 `node/node-v20.10.0-linux-arm64/`
 - 安装 mineru-open-api
 
-#### 4. 运行程序
+##### 2.4 运行程序
 
 ```bash
 cd ..
@@ -123,21 +156,24 @@ source .venv/bin/activate
 python3 main.py
 ```
 
-#### 5. 注意事项
+#### 3. 注意事项
 
 - **PDF解析**：必须先运行 `node/setup_node_linux.sh` 配置Node.js环境
 - **API配置**：首次使用需要在程序中配置AI接口地址和密钥
 - **输出路径**：生成的Excel和PDF文件默认保存在用户目录
 
-#### 6. 常见问题
+#### 4. 常见问题
 
 **Q: 提示"Node.js not found"**
 - 确保已运行 `node/setup_node_linux.sh`
-- 确保程序目录下有 `node/node-v20.10.0-linux-x64/` 目录
+- 确保程序目录下有 `node/node-v20.10.0-linux-x64/` 或 `node/node-v20.10.0-linux-arm64/` 目录
 
 **Q: 图形界面无法启动**
 - 确保已安装PySide6：`pip install PySide6`
 - 检查系统是否支持Qt图形环境
+
+**Q: 可执行文件格式错误**
+- 这通常是架构不匹配问题，请确保运行 `node/setup_node_linux.sh` 自动检测并安装正确架构的Node.js
 
 ## 使用说明
 
@@ -190,6 +226,7 @@ python3 main.py
 main/
 ├── main.py                    # 程序入口
 ├── build_exe.ps1              # Windows 打包脚本
+├── uos_auto_prepare.sh        # UOS 一键环境配置脚本
 ├── requirements.txt            # Python 依赖
 ├── README.md                   # 本文档
 │
@@ -214,7 +251,10 @@ main/
     └── build_app.sh           # Linux 打包脚本
 
 node/                          # Node.js 运行时（PDF 解析用）
-└── node-v20.10.0-win-x64/    # Windows Node.js
+├── node-v20.10.0-win-x64/     # Windows Node.js
+├── node-v20.10.0-linux-x64/   # Linux x64 Node.js
+├── node-v20.10.0-linux-arm64/ # Linux ARM64 Node.js
+└── setup_node_linux.sh        # Linux Node.js 配置脚本
 ```
 
 ## 常见问题
@@ -229,7 +269,7 @@ pip install -r requirements.txt
 
 1. 确保 `node` 文件夹与程序在同一目录
 2. 确保 Node.js 可执行文件存在
-3. 检查 `node/node-v20.10.0-win-x64/node.exe` 是否存在
+3. 检查 `node/node-v20.10.0-linux-x64/node` 或 `node/node-v20.10.0-linux-arm64/node` 是否存在
 
 ### Q: AI 接口报错
 
