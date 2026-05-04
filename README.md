@@ -62,8 +62,9 @@ Remove-Item -Recurse -Force build, dist, .venv -ErrorAction SilentlyContinue
 ```
 
 打包完成后：
-- 目录模式：`codex\dist\ScoreReportTool\` 文件夹
-- 单文件模式：`codex\dist\ScoreReportTool.exe`
+
+- 目录模式：`dist\ScoreReportTool\` 文件夹
+- 单文件模式：`dist\ScoreReportTool.exe`
 
 **注意**：运行打包后的程序时，`node` 文件夹必须与 EXE 在同一目录下。
 
@@ -85,6 +86,7 @@ chmod +x uos_auto_prepare.sh
 ```
 
 脚本会自动完成以下操作：
+
 - 检测系统架构（x86_64 / aarch64），下载对应版本的 Miniconda
 - 创建 Python 虚拟环境 `pyside6_env`
 - 安装 PySide6 及所有项目依赖
@@ -95,6 +97,7 @@ chmod +x uos_auto_prepare.sh
 > ⚠️ 安装过程需要网络连接，请确保能够访问清华 pip 镜像源。
 
 配置完成后，每次使用前运行：
+
 ```bash
 conda activate pyside6_env
 python3 main.py
@@ -146,6 +149,7 @@ chmod +x setup_node_linux.sh
 ```
 
 脚本会自动完成：
+
 - 检测系统架构（x86_64 / aarch64），下载对应版本的 Node.js
 - 解压到 `node/node-v20.10.0-linux-x64/` 或 `node/node-v20.10.0-linux-arm64/`
 - 安装 mineru-open-api
@@ -167,14 +171,17 @@ python3 main.py
 #### 4. 常见问题
 
 **Q: 提示"Node.js not found"**
+
 - 确保已运行一键配置脚本或 `node/setup_node_linux.sh`
 - 确保程序目录下有 `node/node-v20.10.0-linux-x64/` 或 `node/node-v20.10.0-linux-arm64/` 目录
 
 **Q: 图形界面无法启动**
+
 - 确保已安装PySide6：`pip install PySide6`
 - 检查系统是否支持Qt图形环境
 
 **Q: 可执行文件格式错误**
+
 - 这通常是架构不匹配问题，请确保运行配置脚本自动检测并安装正确架构的Node.js
 
 ## 使用说明
@@ -215,12 +222,12 @@ python3 main.py
 
 ### API 配置说明
 
-| 参数 | 说明 | 示例 |
-|------|------|------|
+| 参数     | 说明                | 示例                                           |
+| -------- | ------------------- | ---------------------------------------------- |
 | API 地址 | OpenAI 兼容接口地址 | `https://api.openai.com/v1/chat/completions` |
-| API 密钥 | 接口访问密钥 | `sk-xxxxxx` |
-| 模型 | 使用的 AI 模型 | `gpt-4`、`gpt-3.5-turbo` |
-| 超时时间 | 请求超时时间（秒） | `120` |
+| API 密钥 | 接口访问密钥        | `sk-xxxxxx`                                  |
+| 模型     | 使用的 AI 模型      | `gpt-4`、`gpt-3.5-turbo`                   |
+| 超时时间 | 请求超时时间（秒）  | `120`                                        |
 
 ## 项目结构
 
@@ -295,14 +302,14 @@ pip install -r requirements.txt
 
 ## 技术栈
 
-| 类别 | 技术 |
-|------|------|
-| GUI 框架 | PySide6 |
-| PDF 解析 | mineru-open-api + Node.js |
-| AI 接口 | OpenAI 兼容 API |
-| Excel 处理 | pandas + openpyxl |
-| PDF 生成 | reportlab |
-| 打包工具 | PyInstaller |
+| 类别       | 技术                      |
+| ---------- | ------------------------- |
+| GUI 框架   | PySide6                   |
+| PDF 解析   | mineru-open-api + Node.js |
+| AI 接口    | OpenAI 兼容 API           |
+| Excel 处理 | pandas + openpyxl         |
+| PDF 生成   | reportlab                 |
+| 打包工具   | PyInstaller               |
 
 ## 许可证
 
