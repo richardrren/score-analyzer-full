@@ -20,7 +20,7 @@ from .models import GroupStat, StudentAnalysis
 FONT_NAME = "STSong-Light"
 FONT_FALLBACKS = {
     "Windows": "STSong-Light",
-    "Linux": "NotoSansCJK-Regular",
+    "Linux": "STSong-Light",
     "Darwin": "STSong-Light",
 }
 
@@ -32,22 +32,17 @@ def _register_font() -> None:
         system = platform.system()
         font_name = FONT_FALLBACKS.get(system, "STSong-Light")
         if system == "Linux":
-            font_paths = [
-                "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
-                "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
-                "/usr/share/fonts/noto-cjk/NotoSansCJK-Regular.ttc",
-                "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
-                "/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc",
-            ]
-            for font_path in font_paths:
-                if Path(font_path).exists():
-                    pdfmetrics.registerFont(TTFont(font_name, font_path))
-                    break
-            else:
-                try:
-                    pdfmetrics.registerFont(UnicodeCIDFont(font_name))
-                except Exception:
-                    pass
+            # 在Linux上直接使用reportlab内置的CID字体，避免TTC字体兼容性问题
+            try:
+                pdfmetrics.registerFont(UnicodeCIDFont(font_name))
+            except Exception:
+                # 如果STSong不可用，尝试其他内置字体
+                for fallback_font in ["MSung-Light", "STHeiti-Light", "STKaiti-Light"]:
+                    try:
+                        pdfmetrics.registerFont(UnicodeCIDFont(fallback_font))
+                        break
+                    except Exception:
+                        continue
         else:
             pdfmetrics.registerFont(UnicodeCIDFont(font_name))
 
