@@ -66,7 +66,18 @@ Remove-Item -Recurse -Force build, dist, .venv -ErrorAction SilentlyContinue
 - 目录模式：`dist\ScoreReportTool\` 文件夹
 - 单文件模式：`dist\ScoreReportTool.exe`
 
-**注意**：运行打包后的程序时，`node` 文件夹必须与 EXE 在同一目录下。
+**使用方式**：
+
+- **目录模式**：`dist\ScoreReportTool\` 文件夹内已包含所有资源，直接运行 `ScoreReportTool.exe` 即可
+- **单文件模式**：`dist\ScoreReportTool.exe`，首次运行会自动解压
+
+> 💡 **node 文件夹**：程序会自动搜索 EXE 同目录或上层目录下的 `node` 文件夹。如需手动放置，请确保目录结构为：
+> ```
+> dist\
+> ├── ScoreReportTool.exe
+> └── node\
+>     └── node-v20.10.0-win-x64\
+> ```
 
 ### Linux / 统信UOS
 
