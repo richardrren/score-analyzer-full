@@ -16,75 +16,91 @@ def get_project_root():
     return current
 
 def get_local_node_path():
-    if hasattr(sys, '_MEIPASS'):
-        base_dir = sys._MEIPASS
-    else:
-        base_dir = get_project_root()
-    
+    project_root = get_project_root()
+
     system = platform.system()
     machine = platform.machine().lower()
     if system == "Windows":
-        node_dir = os.path.join(base_dir, "node", "node-v20.10.0-win-x64")
+        node_subdir = "node-v20.10.0-win-x64"
     elif system == "Linux":
-        if machine in ("aarch64", "arm64"):
-            node_dir = os.path.join(base_dir, "node", "node-v20.10.0-linux-arm64")
-        else:
-            node_dir = os.path.join(base_dir, "node", "node-v20.10.0-linux-x64")
+        node_subdir = "node-v20.10.0-linux-arm64" if machine in ("aarch64", "arm64") else "node-v20.10.0-linux-x64"
     else:
-        node_dir = os.path.join(base_dir, "node", "node-v20.10.0-linux-x64")
-    
-    if os.path.exists(node_dir):
-        return node_dir
-    
+        node_subdir = "node-v20.10.0-linux-x64"
+
+    search_dirs = []
+
+    if hasattr(sys, '_MEIPASS'):
+        search_dirs.append(os.path.join(sys._MEIPASS, "node"))
+        exe_dir = os.path.dirname(sys.executable)
+        search_dirs.append(os.path.join(exe_dir, "node"))
+        search_dirs.append(os.path.join(exe_dir, "..", "node"))
+    else:
+        search_dirs.append(os.path.join(project_root, "node"))
+
+    for search_dir in search_dirs:
+        full_path = os.path.join(search_dir, node_subdir)
+        if os.path.exists(full_path):
+            return search_dir
+
     return None
 
 def find_mineru_script(node_path):
     if not node_path:
         return None
-    
+
     paths_to_check = [
         os.path.join(node_path, "lib", "node_modules", "node_modules", "mineru-open-api", "bin", "mineru-open-api"),
         os.path.join(node_path, "lib", "node_modules", "mineru-open-api", "bin", "mineru-open-api"),
         os.path.join(node_path, "node_modules", "mineru-open-api", "bin", "mineru-open-api"),
     ]
-    
+
     for path in paths_to_check:
         if os.path.exists(path):
             return path
-    
+
     return None
 
 def extract_pdf_content(pdf_path):
     try:
         node_path = get_local_node_path()
-        
+
         if not node_path:
             print("ERROR: Local Node.js not found")
             return None
-        
+
         system = platform.system()
+        machine = platform.machine().lower()
         if system == "Windows":
-            node_exe = os.path.join(node_path, "node.exe")
+            node_subdir = "node-v20.10.0-win-x64"
+        elif system == "Linux":
+            node_subdir = "node-v20.10.0-linux-arm64" if machine in ("aarch64", "arm64") else "node-v20.10.0-linux-x64"
         else:
-            node_exe = os.path.join(node_path, "bin", "node")
-        
+            node_subdir = "node-v20.10.0-linux-x64"
+
+        full_node_path = os.path.join(node_path, node_subdir)
+
+        if system == "Windows":
+            node_exe = os.path.join(full_node_path, "node.exe")
+        else:
+            node_exe = os.path.join(full_node_path, "bin", "node")
+
         if not os.path.exists(node_exe):
             print(f"ERROR: Node.js executable not found at {node_exe}")
             return None
-        
-        mineru_script = find_mineru_script(node_path)
+
+        mineru_script = find_mineru_script(full_node_path)
         if not mineru_script:
             print("ERROR: mineru-open-api script not found")
             return None
-        
+
         cmd = [node_exe, mineru_script, "flash-extract", pdf_path]
-        
+
         env = os.environ.copy()
         if system == "Windows":
-            env["PATH"] = node_path + os.pathsep + env["PATH"]
+            env["PATH"] = full_node_path + os.pathsep + env["PATH"]
         else:
-            env["PATH"] = os.path.join(node_path, "bin") + os.pathsep + env["PATH"]
-        
+            env["PATH"] = os.path.join(full_node_path, "bin") + os.pathsep + env["PATH"]
+
         result = subprocess.run(
             cmd,
             capture_output=True,
@@ -93,14 +109,14 @@ def extract_pdf_content(pdf_path):
             env=env,
             encoding='utf-8'
         )
-        
+
         if result.returncode == 0 and result.stdout.strip():
             return result.stdout
         else:
             if result.stderr:
                 print(f"mineru-open-api error: {result.stderr}")
             return None
-            
+
     except subprocess.TimeoutExpired:
         print("PDF parsing timed out")
         return None
