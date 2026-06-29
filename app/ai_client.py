@@ -1,5 +1,6 @@
 import requests
 import json
+import re
 
 SYSTEM_PROMPT = """你是一位专业的初中科学试卷分析专家。请根据提供的试卷内容，生成标准化的试卷细目表。
 
@@ -32,7 +33,7 @@ def generate_analysis(pdf_content, api_url, api_key, model):
         "Content-Type": "application/json",
         "Authorization": f"Bearer {api_key}"
     }
-    
+
     messages = [
         {
             "role": "system",
@@ -43,13 +44,13 @@ def generate_analysis(pdf_content, api_url, api_key, model):
             "content": f"请分析以下试卷内容并生成细目表：\n\n{pdf_content}"
         }
     ]
-    
+
     payload = {
         "model": model,
         "messages": messages,
         "temperature": 0.3
     }
-    
+
     try:
         response = requests.post(
             api_url,
@@ -57,16 +58,67 @@ def generate_analysis(pdf_content, api_url, api_key, model):
             json=payload,
             timeout=120
         )
-        response.raise_for_status()
-        
+
+        if response.status_code != 200:
+            error_msg = f"API返回错误状态码: {response.status_code}"
+            try:
+                error_detail = response.json()
+                if "error" in error_detail:
+                    error_msg = f"API错误: {error_detail['error'].get('message', error_detail['error'])}"
+            except:
+                error_msg = f"API错误: {response.text[:500]}"
+            print(f"API调用错误: {error_msg}")
+            return None
+
         result = response.json()
-        content = result["choices"][0]["message"]["content"]
-        
+
+        # 尝试多种方式获取内容
+        content = None
+        if isinstance(result, dict):
+            # 方式1: 标准 OpenAI 格式
+            if "choices" in result and len(result["choices"]) > 0:
+                choice = result["choices"][0]
+                if isinstance(choice, dict):
+                    # 尝试 message.content
+                    if "message" in choice and isinstance(choice["message"], dict):
+                        content = choice["message"].get("content")
+                    # 尝试 reasoning_content (小米等模型思考内容)
+                    if not content and "reasoning_content" in choice:
+                        content = choice["reasoning_content"]
+                    # 尝试 content 直接在 choice 中
+                    if not content and "content" in choice:
+                        content = choice["content"]
+            # 方式2: content 直接在根节点
+            elif "content" in result:
+                content = result["content"]
+
+        if not content:
+            print(f"API调用错误: 无法从响应中提取内容，响应结构: {list(result.keys()) if isinstance(result, dict) else type(result)}")
+            return None
+
+        # 清理思考标签，如 <thinking>...</thinking> 或 [think]...[/think]
+        content = re.sub(r'<thinking>.*?</thinking>', '', content, flags=re.DOTALL)
+        content = re.sub(r'\[think\].*?\[/think\]', '', content, flags=re.DOTALL)
+        content = re.sub(r'\[thinking\].*?\[/thinking\]', '', content, flags=re.DOTALL)
+
+        # 提取JSON
         json_start = content.find('[')
         json_end = content.rfind(']') + 1
-        if json_start != -1 and json_end != -1:
+        if json_start != -1 and json_end > json_start:
             json_str = content[json_start:json_end]
             return json.loads(json_str)
+
+        print(f"API调用错误: 无法从响应中提取JSON内容")
+        return None
+
+    except requests.exceptions.Timeout:
+        print("API调用错误: 请求超时")
+        return None
+    except requests.exceptions.ConnectionError as e:
+        print(f"API调用错误: 连接失败 - {e}")
+        return None
+    except json.JSONDecodeError as e:
+        print(f"API调用错误: JSON解析失败 - {e}")
         return None
     except Exception as e:
         print(f"API调用错误: {e}")
